@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"golambda_helper"
+	"github.com/tkeech1/golambda_helper"
 
 	"github.com/stretchr/testify/assert"
 )
