@@ -5,3 +5,8 @@ Helper functions for AWS Go Lambda
 ```
 make test
 ```
+
+# Build in Docker. This generates a bin directory containing the binary in the working directory.
+```
+make build
+```
