@@ -66,9 +66,7 @@ func TestHandlerDynamoHelper(t *testing.T) {
 			requestId: "",
 			queryResponse: []map[string]*dynamodb.AttributeValue{
 				999: {
-					"id": {
-						S: aws.String(""),
-					},
+					"id": {},
 				},
 			},
 			err: nil,
