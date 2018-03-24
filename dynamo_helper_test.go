@@ -44,6 +44,31 @@ func TestHandlerDynamoHelper(t *testing.T) {
 			},
 			err: errors.New("Some error"),
 		},
+		"multiple return records": {
+			tableName: "testTable",
+			requestId: "",
+			queryResponse: []map[string]*dynamodb.AttributeValue{
+				0: {
+					"id": {
+						S: aws.String(""),
+					},
+				},
+				1: {
+					"id": {
+						S: aws.String(""),
+					},
+				},
+			},
+			err: nil,
+		},
+		"empty return array": {
+			tableName: "testTable",
+			requestId: "",
+			queryResponse: []map[string]*dynamodb.AttributeValue{
+				0: {},
+			},
+			err: nil,
+		},
 	}
 
 	for name, test := range tests {
