@@ -12,7 +12,7 @@ import (
 	"github.com/tkeech1/golambda_helper/mocks"
 )
 
-func DynamoHelperTestHandler(t *testing.T) {
+func TestHandlerDynamoHelper(t *testing.T) {
 
 	tests := map[string]struct {
 		requestId     string
@@ -34,21 +34,13 @@ func DynamoHelperTestHandler(t *testing.T) {
 		},
 		"error": {
 			tableName: "testTable",
-			requestId: "testID",
+			requestId: "",
 			queryResponse: []map[string]*dynamodb.AttributeValue{
 				0: {
 					"id": {
-						S: aws.String("testID"),
+						S: aws.String(""),
 					},
 				},
-			},
-			err: errors.New("Some error"),
-		},
-		"empty array": {
-			tableName: "testTable",
-			requestId: "testID",
-			queryResponse: []map[string]*dynamodb.AttributeValue{
-				0: {},
 			},
 			err: errors.New("Some error"),
 		},
