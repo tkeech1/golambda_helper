@@ -61,13 +61,11 @@ func TestHandlerDynamoHelper(t *testing.T) {
 			},
 			err: nil,
 		},
-		"empty return array": {
-			tableName: "testTable",
-			requestId: "",
-			queryResponse: []map[string]*dynamodb.AttributeValue{
-				0: {},
-			},
-			err: nil,
+		"missing array": {
+			tableName:     "testTable",
+			requestId:     "",
+			queryResponse: []map[string]*dynamodb.AttributeValue{},
+			err:           nil,
 		},
 	}
 
