@@ -65,8 +65,8 @@ func TestHandlerDynamoHelper(t *testing.T) {
 			tableName: "testTable",
 			requestId: "",
 			queryResponse: []map[string]*dynamodb.AttributeValue{
-				999: {
-					"id": {},
+				0: {
+					"test": {},
 				},
 			},
 			err: nil,
