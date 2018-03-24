@@ -62,10 +62,16 @@ func TestHandlerDynamoHelper(t *testing.T) {
 			err: nil,
 		},
 		"missing array": {
-			tableName:     "testTable",
-			requestId:     "",
-			queryResponse: []map[string]*dynamodb.AttributeValue{},
-			err:           nil,
+			tableName: "testTable",
+			requestId: "",
+			queryResponse: []map[string]*dynamodb.AttributeValue{
+				999: {
+					"id": {
+						S: aws.String(""),
+					},
+				},
+			},
+			err: nil,
 		},
 	}
 
