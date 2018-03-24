@@ -12,39 +12,47 @@ import (
 	"github.com/tkeech1/golambda_helper/mocks"
 )
 
-func TestHandler2(t *testing.T) {
+func DynamoHelperTestHandler(t *testing.T) {
 
 	tests := map[string]struct {
-		recordErr error
-		response  string
-		tableName string
-		id        string
-		err       error
+		requestId     string
+		queryResponse []map[string]*dynamodb.AttributeValue
+		tableName     string
+		err           error
 	}{
-		"successful": {
-			recordErr: errors.New("Some error"),
-			response:  "i dont know",
+		"success": {
 			tableName: "testTable",
-			id:        "someID",
-			err:       nil,
+			requestId: "testID",
+			queryResponse: []map[string]*dynamodb.AttributeValue{
+				0: {
+					"id": {
+						S: aws.String("testID"),
+					},
+				},
+			},
+			err: nil,
 		},
-		"with error": {
-			recordErr: errors.New("Some error"),
-			response:  "i dont know",
+		"error": {
 			tableName: "testTable",
-			id:        "someID",
-			err:       nil,
+			requestId: "testID",
+			queryResponse: []map[string]*dynamodb.AttributeValue{
+				0: {
+					"id": {
+						S: aws.String("testID"),
+					},
+				},
+			},
+			err: errors.New("Some error"),
+		},
+		"empty array": {
+			tableName: "testTable",
+			requestId: "testID",
+			queryResponse: []map[string]*dynamodb.AttributeValue{
+				0: {},
+			},
+			err: errors.New("Some error"),
 		},
 	}
-
-	/*sess, err := session.NewSession(&aws.Config{
-			Region: aws.String(os.Getenv("ENV_AWS_REGION"))},
-		)
-		if err != nil {
-			return dbRecord, err
-	}
-
-	svc := dynamodb.New(sess)*/
 
 	for name, test := range tests {
 		t.Logf("Running test case: %s", name)
@@ -57,27 +65,23 @@ func TestHandler2(t *testing.T) {
 						ComparisonOperator: aws.String("EQ"),
 						AttributeValueList: []*dynamodb.AttributeValue{
 							{
-								S: aws.String(test.id),
+								S: aws.String(test.requestId),
 							},
 						},
 					},
 				},
 			}).
 			Return(&dynamodb.QueryOutput{
-				Items: []map[string]*dynamodb.AttributeValue{
-					0: {
-						"id": {
-							S: aws.String(test.id),
-						},
-					},
-				},
-			}, nil).
+				Items: test.queryResponse,
+			}, test.err).
 			Once()
+
 		h := &golambda_helper.Handler{
 			Svc: mockRecorder,
 		}
-		response, err := h.GetRecordById(test.id, test.tableName)
-		assert.Equal(t, response.Id, test.id)
+
+		response, err := h.GetRecordById(test.requestId, test.tableName)
+		assert.Equal(t, response.Id, test.requestId)
 		assert.Equal(t, err, test.err)
 		mockRecorder.AssertExpectations(t)
 	}

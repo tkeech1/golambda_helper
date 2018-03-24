@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandler(t *testing.T) {
+func ResponseHelperTestHandler(t *testing.T) {
 
 	tests := []struct {
 		request          error

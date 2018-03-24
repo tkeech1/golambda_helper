@@ -21,14 +21,7 @@ type DynamoDbRecord struct {
 
 func (h *Handler) GetRecordById(id string, tableName string) (DynamoDbRecord, error) {
 	dbRecord := DynamoDbRecord{}
-	//sess, err := session.NewSession(&aws.Config{
-	//	Region: aws.String(os.Getenv("ENV_AWS_REGION"))},
-	//)
-	//if err != nil {
-	//	return dbRecord, err
-	//}
 
-	//svc := dynamodb.New(sess)
 	result, err := h.Svc.Query(&dynamodb.QueryInput{
 		TableName: aws.String(tableName),
 		KeyConditions: map[string]*dynamodb.Condition{
