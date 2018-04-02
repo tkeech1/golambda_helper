@@ -49,12 +49,12 @@ func TestHandlerDynamoHelper(t *testing.T) {
 			requestId: "",
 			queryResponse: []map[string]*dynamodb.AttributeValue{
 				0: {
-					"id": {
+					"ids": {
 						S: aws.String(""),
 					},
 				},
 				1: {
-					"id": {
+					"ids": {
 						S: aws.String(""),
 					},
 				},

@@ -4,32 +4,47 @@ import (
 	"encoding/json"
 )
 
-type Header struct {
-	ContentType              string `json:"Content-Type"`
-	AccessControlAllowOrigin string `json:"Access-Control-Allow-Origin"`
-}
-
-type Response struct {
-	Body       string `json:"body"`
-	StatusCode int    `json:"statusCode"`
-	Header     Header `json:"headers"`
-}
-
-var headers = Header{
-	ContentType:              "application/json",
-	AccessControlAllowOrigin: "*",
-}
-
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
-
 func GenerateError(err error) (Response, error) {
 	errorResponse := ErrorResponse{err.Error()}
 	responseBody, err := json.Marshal(errorResponse)
 	return Response{
 		Body:       string(responseBody),
 		StatusCode: 400,
-		Header:     headers,
+		Header: Header{
+			ContentType:              "application/json",
+			AccessControlAllowOrigin: "*",
+		},
 	}, nil
+}
+
+func GenerateResponseShops(shop []Shop) (Response, error) {
+	returnObject := ReturnObjectShops{shop}
+	responseBody, err := json.Marshal(returnObject)
+	if err == nil {
+		return Response{
+			Body:       string(responseBody),
+			StatusCode: 200,
+			Header: Header{
+				ContentType:              "application/json",
+				AccessControlAllowOrigin: "*",
+			},
+		}, nil
+	}
+	return GenerateError(err)
+}
+
+func GenerateResponseShop(shop Shop) (Response, error) {
+	returnObject := ReturnObjectShop{shop}
+	responseBody, err := json.Marshal(returnObject)
+	if err == nil {
+		return Response{
+			Body:       string(responseBody),
+			StatusCode: 200,
+			Header: Header{
+				ContentType:              "application/json",
+				AccessControlAllowOrigin: "*",
+			},
+		}, nil
+	}
+	return GenerateError(err)
 }
