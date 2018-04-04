@@ -1,5 +1,16 @@
 package golambda_helper
 
+import "github.com/aws/aws-sdk-go/service/dynamodb"
+
+type DynamoInterface interface {
+	Query(*dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
+	PutItem(*dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
+}
+
+type Handler struct {
+	Svc DynamoInterface
+}
+
 type Header struct {
 	ContentType              string `json:"Content-Type"`
 	AccessControlAllowOrigin string `json:"Access-Control-Allow-Origin"`

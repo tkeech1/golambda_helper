@@ -12,5 +12,5 @@ make test-local
 
 # Use mockery to mock AWS services
 ```
-~/go/bin/mockery -name=Recorder
+~/go/bin/mockery -name=DynamoInterface
 ```
