@@ -14,6 +14,7 @@ type Handler struct {
 type Header struct {
 	ContentType              string `json:"Content-Type"`
 	AccessControlAllowOrigin string `json:"Access-Control-Allow-Origin"`
+	Location                 string `json:"Location"`
 }
 
 type Response struct {

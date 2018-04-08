@@ -40,6 +40,31 @@ func TestHandlerResponseHelper_GenerateError(t *testing.T) {
 
 }
 
+func TestHandlerResponseHelper_GenerateRedirect(t *testing.T) {
+
+	tests := []struct {
+		request      string
+		responseText string
+		expect       int
+		err          error
+	}{
+		{
+			responseText: "http://www.google.com",
+			request:      "http://www.google.com",
+			expect:       302,
+			err:          nil,
+		},
+	}
+
+	for _, test := range tests {
+		response, err := golambda_helper.GenerateRedirect(test.request)
+		assert.IsType(t, test.err, err)
+		assert.Equal(t, test.expect, response.StatusCode)
+		assert.Equal(t, test.responseText, response.Header.Location)
+	}
+
+}
+
 func TestHandlerResponseHelper_GenerateResponseShop(t *testing.T) {
 
 	tests := []struct {

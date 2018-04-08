@@ -17,6 +17,15 @@ func GenerateError(err error) (Response, error) {
 	}, nil
 }
 
+func GenerateRedirect(url string) (Response, error) {
+	return Response{
+		StatusCode: 302,
+		Header: Header{
+			Location: url,
+		},
+	}, nil
+}
+
 func GenerateResponseShops(shop []Shop) (Response, error) {
 	returnObject := ReturnObjectShops{shop}
 	responseBody, err := json.Marshal(returnObject)
