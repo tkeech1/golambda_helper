@@ -1,6 +1,8 @@
 package golambda_helper
 
-import "github.com/aws/aws-sdk-go/service/dynamodb"
+import (
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+)
 
 type DynamoInterface interface {
 	Query(*dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
