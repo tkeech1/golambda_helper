@@ -141,10 +141,7 @@ func (h *DynamoHandler) GetById(id string, tableName string, v interface{}) erro
 	}
 
 	if len(result.Items) == 1 {
-		err = dynamodbattribute.UnmarshalMap(result.Items[0], &v)
-		if err != nil {
-			return err
-		}
+		return dynamodbattribute.UnmarshalMap(result.Items[0], &v)
 	}
 
 	return errors.New("An error occurred during processing.")
