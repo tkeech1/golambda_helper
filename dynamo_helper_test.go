@@ -21,11 +21,11 @@ func TestHandlerDynamoHelper_GetShopNameById(t *testing.T) {
 		tableName     string
 		err           error
 	}{
-		"success_0_records": {
+		"error_0_records": {
 			tableName:     "testTable",
 			requestId:     "",
 			queryResponse: []map[string]*dynamodb.AttributeValue{},
-			err:           nil,
+			err:           errors.New("An error occurred during processing."),
 		},
 		"success_1_record": {
 			tableName: "testTable",
@@ -39,7 +39,7 @@ func TestHandlerDynamoHelper_GetShopNameById(t *testing.T) {
 			},
 			err: nil,
 		},
-		"success_2_records": {
+		"error_2_records": {
 			tableName: "testTable",
 			requestId: "",
 			queryResponse: []map[string]*dynamodb.AttributeValue{
@@ -54,7 +54,7 @@ func TestHandlerDynamoHelper_GetShopNameById(t *testing.T) {
 					},
 				},
 			},
-			err: nil,
+			err: errors.New("An error occurred during processing."),
 		},
 		"error": {
 			tableName:     "testTable",
@@ -90,7 +90,8 @@ func TestHandlerDynamoHelper_GetShopNameById(t *testing.T) {
 			Svc: mockDynamoInterface,
 		}
 
-		response, err := h.GetShopNameById(test.requestId, test.tableName)
+		var response golambda_helper.ShopName
+		err := h.GetById("id", test.requestId, test.tableName, &response)
 		assert.Equal(t, response.Id, test.requestId)
 		assert.Equal(t, err, test.err)
 		mockDynamoInterface.AssertExpectations(t)
@@ -252,8 +253,7 @@ func TestHandlerDynamoHelper_PutShop(t *testing.T) {
 			Svc: mockDynamoInterface,
 		}
 
-		response, err := h.PutShop(test.shopname, test.tableName)
-		assert.Equal(t, response, test.queryResponse)
+		err := h.Put(test.shopname, test.tableName)
 		assert.Equal(t, err, test.err)
 		mockDynamoInterface.AssertExpectations(t)
 	}
