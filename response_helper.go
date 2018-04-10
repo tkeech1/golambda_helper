@@ -26,8 +26,8 @@ func GenerateRedirect(url string) (Response, error) {
 	}, nil
 }
 
-func GenerateResponseShops(shop []Shop) (Response, error) {
-	returnObject := ReturnObjectShops{shop}
+func GenerateResponseShops(shopname []ShopName) (Response, error) {
+	returnObject := ReturnObjectShopNames{shopname}
 	responseBody, err := json.Marshal(returnObject)
 	if err == nil {
 		return Response{
@@ -42,8 +42,8 @@ func GenerateResponseShops(shop []Shop) (Response, error) {
 	return GenerateError(err)
 }
 
-func GenerateResponseShop(shop Shop) (Response, error) {
-	returnObject := ReturnObjectShop{shop}
+func GenerateResponseShop(shopname ShopName) (Response, error) {
+	returnObject := ReturnObjectShopName{shopname}
 	responseBody, err := json.Marshal(returnObject)
 	if err == nil {
 		return Response{

@@ -86,7 +86,7 @@ func TestHandlerDynamoHelper_GetShopNameById(t *testing.T) {
 			}, test.err).
 			Once()
 
-		h := &golambda_helper.Handler{
+		h := &golambda_helper.DynamoHandler{
 			Svc: mockDynamoInterface,
 		}
 
@@ -199,7 +199,7 @@ func TestHandlerDynamoHelper_GetShopFriendlyNamesByShopName(t *testing.T) {
 			}, test.err).
 			Once()
 
-		h := &golambda_helper.Handler{
+		h := &golambda_helper.DynamoHandler{
 			Svc: mockDynamoInterface,
 		}
 
@@ -216,21 +216,21 @@ func TestHandlerDynamoHelper_GetShopFriendlyNamesByShopName(t *testing.T) {
 func TestHandlerDynamoHelper_PutShop(t *testing.T) {
 
 	tests := map[string]struct {
-		shop          golambda_helper.Shop
-		queryResponse golambda_helper.Shop
+		shopname      golambda_helper.ShopName
+		queryResponse golambda_helper.ShopName
 		tableName     string
 		err           error
 	}{
 		"success": {
 			tableName:     "testTable",
-			shop:          golambda_helper.Shop{Id: "1234", ShopName: "Test"},
-			queryResponse: golambda_helper.Shop{Id: "1234", ShopName: "Test"},
+			shopname:      golambda_helper.ShopName{Id: "1234", ShopName: "Test"},
+			queryResponse: golambda_helper.ShopName{Id: "1234", ShopName: "Test"},
 			err:           nil,
 		},
 		"error": {
 			tableName:     "testTable",
-			shop:          golambda_helper.Shop{},
-			queryResponse: golambda_helper.Shop{},
+			shopname:      golambda_helper.ShopName{},
+			queryResponse: golambda_helper.ShopName{},
 			err:           errors.New("Could not insert shop "),
 		},
 	}
@@ -239,7 +239,7 @@ func TestHandlerDynamoHelper_PutShop(t *testing.T) {
 		t.Logf("Running test case: %s", name)
 		mockDynamoInterface := &mocks.DynamoInterface{}
 
-		av, _ := dynamodbattribute.MarshalMap(test.shop)
+		av, _ := dynamodbattribute.MarshalMap(test.shopname)
 		mockDynamoInterface.
 			On("PutItem", &dynamodb.PutItemInput{
 				Item:      av,
@@ -248,11 +248,11 @@ func TestHandlerDynamoHelper_PutShop(t *testing.T) {
 			Return(&dynamodb.PutItemOutput{}, test.err).
 			Once()
 
-		h := &golambda_helper.Handler{
+		h := &golambda_helper.DynamoHandler{
 			Svc: mockDynamoInterface,
 		}
 
-		response, err := h.PutShop(test.shop, test.tableName)
+		response, err := h.PutShop(test.shopname, test.tableName)
 		assert.Equal(t, response, test.queryResponse)
 		assert.Equal(t, err, test.err)
 		mockDynamoInterface.AssertExpectations(t)
