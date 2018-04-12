@@ -10,6 +10,34 @@ type DynamoInterface struct {
 	mock.Mock
 }
 
+// GetById provides a mock function with given fields: _a0, _a1, _a2, _a3
+func (_m *DynamoInterface) GetById(_a0 string, _a1 string, _a2 string, _a3 interface{}) error {
+	ret := _m.Called(_a0, _a1, _a2, _a3)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string, string, interface{}) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Put provides a mock function with given fields: _a0, _a1
+func (_m *DynamoInterface) Put(_a0 interface{}, _a1 string) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(interface{}, string) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // PutItem provides a mock function with given fields: _a0
 func (_m *DynamoInterface) PutItem(_a0 *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
 	ret := _m.Called(_a0)

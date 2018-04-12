@@ -11,6 +11,7 @@ import (
 
 type UUIDInterface interface {
 	NewV4() (uuid.UUID, error)
+	GenerateState() (string, error)
 }
 
 type UuidHandler struct {
@@ -20,6 +21,8 @@ type UuidHandler struct {
 type DynamoInterface interface {
 	Query(*dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
 	PutItem(*dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
+	Put(interface{}, string) error
+	GetById(string, string, string, interface{}) error
 }
 
 type DynamoHandler struct {

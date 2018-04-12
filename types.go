@@ -33,10 +33,12 @@ type ShopName struct {
 }
 
 type Oauth struct {
-	ShopName     string `json:"shop_name"`
-	Code         string `json:"code"`
-	Hmac         string `json:"hmac"`
-	InstallState string `json:"install_state"`
-	OauthToken   string `json:"oauth_token"`
-	State        string `json:"state"`
+	ShopName         string `json:"shop_name"`
+	Code             string `json:"code"`
+	Hmac             string `json:"hmac"`
+	InstallState     string `json:"install_state"`
+	OauthToken       string `json:"oauth_token"`
+	State            string `json:"state"`
+	InstallDateTime  string `json:"installdatetime"`
+	CallbackDateTime string `json:"callbackdatetime"`
 }
