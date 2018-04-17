@@ -1,10 +1,6 @@
 package golambda_helper
 
 import (
-	"os"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	uuid "github.com/satori/go.uuid"
 )
@@ -27,26 +23,4 @@ type DynamoInterface interface {
 
 type DynamoHandler struct {
 	Svc DynamoInterface
-}
-
-func (h *DynamoHandler) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
-	})
-	if err != nil {
-		return nil, err
-	}
-	svc := dynamodb.New(sess)
-	return svc.Query(queryInput)
-}
-
-func (h *DynamoHandler) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
-	})
-	if err != nil {
-		return nil, err
-	}
-	svc := dynamodb.New(sess)
-	return svc.PutItem(putItem)
 }

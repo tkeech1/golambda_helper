@@ -26,19 +26,18 @@ type ReturnObjectShopNames struct {
 
 type ShopName struct {
 	Id           string `json:"id"`
-	FriendlyName string `json:"friendly_name"`
-	ShopName     string `json:"shop_name"`
-	CreateDate   string `json:"create_date"`
-	Deleted      string `json:"deleted"`
+	FriendlyName string `json:"friendly_name,omitempty"`
+	ShopName     string `json:"shop_name,omitempty"`
+	CreateDate   string `json:"create_date,omitempty"`
+	Deleted      string `json:"deleted,omitempty"`
 }
 
 type Oauth struct {
 	ShopName         string `json:"shop_name"`
-	Code             string `json:"code"`
-	Hmac             string `json:"hmac"`
-	InstallState     string `json:"install_state"`
-	OauthToken       string `json:"oauth_token"`
-	State            string `json:"state"`
-	InstallDateTime  string `json:"installdatetime"`
-	CallbackDateTime string `json:"callbackdatetime"`
+	Code             string `json:"code,omitempty"`
+	Hmac             string `json:"hmac,omitempty"`
+	InstallState     string `json:"install_state,omitempty"`
+	OauthToken       string `json:"oauth_token,omitempty"`
+	InstallDateTime  string `json:"installdatetime,omitempty"`
+	CallbackDateTime string `json:"callbackdatetime,omitempty"`
 }
