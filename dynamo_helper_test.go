@@ -1,4 +1,4 @@
-package golambda_helper_test
+package golambda_helper
 
 import (
 	"errors"
@@ -8,182 +8,197 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/tkeech1/golambda_helper"
-	"github.com/tkeech1/golambda_helper/mocks"
 )
 
-func TestHandlerDynamoHelper_GetShopNameById(t *testing.T) {
+type QueryerMock struct {
+	QueryFunc func(*dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
+}
+
+func (mock QueryerMock) Query(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+	return mock.QueryFunc(input)
+}
+
+type PutItemerMock struct {
+	PutItemFunc func(*dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
+}
+
+func (mock PutItemerMock) PutItem(item *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
+	return mock.PutItemFunc(item)
+}
+
+func TestHandlerDynamoHelper_GetById(t *testing.T) {
 
 	tests := map[string]struct {
-		requestId     string
-		queryResponse []map[string]*dynamodb.AttributeValue
-		tableName     string
-		err           error
+		idValue     string
+		idName      string
+		tableName   string
+		queryer     QueryerMock
+		errResponse error
 	}{
 		"error_0_records": {
-			tableName:     "testTable",
-			requestId:     "",
-			queryResponse: []map[string]*dynamodb.AttributeValue{},
-			err:           errors.New("An error occurred during processing."),
+			tableName: "testTable",
+			idValue:   "THEVALUE",
+			idName:    "THEID",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return &dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{},
+					}, nil
+				},
+			},
+			errResponse: errors.New("An error occurred during processing."),
 		},
 		"success_1_record": {
 			tableName: "testTable",
-			requestId: "testID",
-			queryResponse: []map[string]*dynamodb.AttributeValue{
-				0: {
-					"id": {
-						S: aws.String("testID"),
-					},
+			idValue:   "THEVALUE",
+			idName:    "THEID",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return &dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{
+							0: {
+								"id": {
+									S: aws.String("THEVALUE"),
+								},
+							},
+						},
+					}, nil
 				},
 			},
-			err: nil,
+			errResponse: nil,
 		},
 		"error_2_records": {
 			tableName: "testTable",
-			requestId: "",
-			queryResponse: []map[string]*dynamodb.AttributeValue{
-				0: {
-					"ids": {
-						S: aws.String(""),
-					},
-				},
-				1: {
-					"ids": {
-						S: aws.String(""),
-					},
+			idValue:   "THEVALUE",
+			idName:    "THEID",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return &dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{
+							0: {
+								"id": {
+									S: aws.String("THEVALUE"),
+								},
+							},
+							1: {
+								"id": {
+									S: aws.String("THEVALUE"),
+								},
+							},
+						},
+					}, nil
 				},
 			},
-			err: errors.New("An error occurred during processing."),
+			errResponse: errors.New("An error occurred during processing."),
 		},
 		"error": {
-			tableName:     "testTable",
-			requestId:     "",
-			queryResponse: []map[string]*dynamodb.AttributeValue{},
-			err:           errors.New("Some error"),
+			tableName: "testTable",
+			idValue:   "THEVALUE",
+			idName:    "THEID",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return nil, errors.New("Some error")
+				},
+			},
+			errResponse: errors.New("Some error"),
 		},
 	}
 
 	for name, test := range tests {
 		t.Logf("Running test case: %s", name)
-		mockDynamoInterface := &mocks.DynamoInterface{}
-		mockDynamoInterface.
-			On("Query", &dynamodb.QueryInput{
-				TableName: aws.String(test.tableName),
+		var response ShopName
+		err := GetById(test.idName, test.idValue, test.tableName, &response, test.queryer)
+		if err != nil {
+			assert.Equal(t, err, test.errResponse)
+		} else {
+			assert.Equal(t, response.Id, test.idValue)
+		}
+
+	}
+}
+
+func TestHandlerDynamoHelper_createGetByIDQuery(t *testing.T) {
+
+	tests := map[string]struct {
+		tableName string
+		idName    string
+		idValue   string
+		response  *dynamodb.QueryInput
+	}{
+		"0": {
+			tableName: "testTable",
+			idName:    "someID",
+			idValue:   "someValue",
+			response: &dynamodb.QueryInput{
+				TableName: aws.String("testTable"),
 				KeyConditions: map[string]*dynamodb.Condition{
-					"id": {
+					"someID": {
 						ComparisonOperator: aws.String("EQ"),
 						AttributeValueList: []*dynamodb.AttributeValue{
 							{
-								S: aws.String(test.requestId),
+								S: aws.String("someValue"),
 							},
 						},
 					},
 				},
-			}).
-			Return(&dynamodb.QueryOutput{
-				Items: test.queryResponse,
-			}, test.err).
-			Once()
-
-		h := &golambda_helper.DynamoHandler{
-			Svc: mockDynamoInterface,
-		}
-
-		var response golambda_helper.ShopName
-		err := h.GetById("id", test.requestId, test.tableName, &response)
-		assert.Equal(t, response.Id, test.requestId)
-		assert.Equal(t, err, test.err)
-		mockDynamoInterface.AssertExpectations(t)
-	}
-}
-
-func TestHandlerDynamoHelper_GetShopFriendlyNamesByShopName(t *testing.T) {
-
-	tests := map[string]struct {
-		shopName      string
-		queryResponse []map[string]*dynamodb.AttributeValue
-		tableName     string
-		err           error
-		size          int
-	}{
-		"success_0_records": {
-			tableName:     "testTable",
-			shopName:      "testName",
-			queryResponse: []map[string]*dynamodb.AttributeValue{},
-			err:           nil,
-			size:          0,
-		},
-		"success_1_record": {
-			tableName: "testTable",
-			shopName:  "testName",
-			queryResponse: []map[string]*dynamodb.AttributeValue{
-				0: {
-					"id": {
-						S: aws.String("0"),
-					},
-					"friendly_name": {
-						S: aws.String("friendlyName"),
-					},
-					"shop_name": {
-						S: aws.String("testName"),
-					},
-				},
 			},
-			err:  nil,
-			size: 1,
-		},
-		"success_2_records": {
-			tableName: "testTable",
-			shopName:  "testName",
-			queryResponse: []map[string]*dynamodb.AttributeValue{
-				0: {
-					"id": {
-						S: aws.String("0"),
-					},
-					"friendly_name": {
-						S: aws.String("friendlyName"),
-					},
-					"shop_name": {
-						S: aws.String("testName"),
-					},
-				},
-				1: {
-					"id": {
-						S: aws.String("0"),
-					},
-					"friendly_name": {
-						S: aws.String("friendlyName"),
-					},
-					"shop_name": {
-						S: aws.String("testName"),
-					},
-				},
-			},
-			err:  nil,
-			size: 2,
-		},
-		"error": {
-			tableName:     "testTable",
-			shopName:      "",
-			queryResponse: []map[string]*dynamodb.AttributeValue{},
-			err:           errors.New("Some error"),
 		},
 	}
 
 	for name, test := range tests {
 		t.Logf("Running test case: %s", name)
-		mockDynamoInterface := &mocks.DynamoInterface{}
-		mockDynamoInterface.
-			On("Query", &dynamodb.QueryInput{
-				TableName: aws.String(test.tableName),
+		response := createGetByIDQuery(test.idName, test.idValue, test.tableName)
+		assert.Equal(t, response, test.response)
+	}
+}
+
+func TestHandlerDynamoHelper_createPutItemOutput(t *testing.T) {
+
+	tests := map[string]struct {
+		shopname  ShopName
+		tableName string
+	}{
+		"1": {
+			tableName: "testTable",
+			shopname:  ShopName{Id: "1234", ShopName: "Test"},
+		},
+	}
+
+	for name, test := range tests {
+		t.Logf("Running test case: %s", name)
+		av, err := dynamodbattribute.MarshalMap(test.shopname)
+		if err != nil {
+			t.Errorf("Failed to marshal item")
+		}
+		response, err := createPutItemInput(test.shopname, test.tableName)
+		if err != nil {
+			t.Errorf("Failed to marshal item")
+		}
+		assert.Equal(t, response.TableName, aws.String(test.tableName))
+		assert.Equal(t, response.ReturnValues, aws.String("ALL_NEW"))
+		assert.Equal(t, response.Item, av)
+	}
+}
+
+func TestHandlerDynamoHelper_createShopFriendlyNamesByShopNameQuery(t *testing.T) {
+
+	tests := map[string]struct {
+		shopName  string
+		response  *dynamodb.QueryInput
+		tableName string
+	}{
+		"1": {
+			tableName: "testTable",
+			shopName:  "testName",
+			response: &dynamodb.QueryInput{
+				TableName: aws.String("testTable"),
 				IndexName: aws.String("shop_name-index"),
 				KeyConditions: map[string]*dynamodb.Condition{
 					"shop_name": {
 						ComparisonOperator: aws.String("EQ"),
 						AttributeValueList: []*dynamodb.AttributeValue{
 							{
-								S: aws.String(test.shopName),
+								S: aws.String("testName"),
 							},
 						},
 					},
@@ -194,67 +209,177 @@ func TestHandlerDynamoHelper_GetShopFriendlyNamesByShopName(t *testing.T) {
 					},
 				},
 				FilterExpression: aws.String("deleted = :deleted_v"),
-			}).
-			Return(&dynamodb.QueryOutput{
-				Items: test.queryResponse,
-			}, test.err).
-			Once()
-
-		h := &golambda_helper.DynamoHandler{
-			Svc: mockDynamoInterface,
-		}
-
-		response, err := h.GetShopFriendlyNamesByShopName(test.shopName, test.tableName)
-		assert.Equal(t, len(response), test.size)
-		if len(response) > 0 {
-			assert.Equal(t, response[0].ShopName, test.shopName)
-		}
-		assert.Equal(t, err, test.err)
-		mockDynamoInterface.AssertExpectations(t)
-	}
-}
-
-func TestHandlerDynamoHelper_PutShop(t *testing.T) {
-
-	tests := map[string]struct {
-		shopname      golambda_helper.ShopName
-		queryResponse golambda_helper.ShopName
-		tableName     string
-		err           error
-	}{
-		"success": {
-			tableName:     "testTable",
-			shopname:      golambda_helper.ShopName{Id: "1234", ShopName: "Test"},
-			queryResponse: golambda_helper.ShopName{Id: "1234", ShopName: "Test"},
-			err:           nil,
-		},
-		"error": {
-			tableName:     "testTable",
-			shopname:      golambda_helper.ShopName{},
-			queryResponse: golambda_helper.ShopName{},
-			err:           errors.New("Could not insert shop "),
+			},
 		},
 	}
 
 	for name, test := range tests {
 		t.Logf("Running test case: %s", name)
-		mockDynamoInterface := &mocks.DynamoInterface{}
+		response := createShopFriendlyNamesByShopNameQuery(test.shopName, test.tableName)
+		assert.Equal(t, response, test.response)
+	}
+}
 
-		av, _ := dynamodbattribute.MarshalMap(test.shopname)
-		mockDynamoInterface.
-			On("PutItem", &dynamodb.PutItemInput{
-				Item:      av,
-				TableName: aws.String(test.tableName),
-			}).
-			Return(&dynamodb.PutItemOutput{}, test.err).
-			Once()
+func TestHandlerDynamoHelper_GetShopFriendlyNamesByShopName(t *testing.T) {
 
-		h := &golambda_helper.DynamoHandler{
-			Svc: mockDynamoInterface,
+	tests := map[string]struct {
+		shopName    string
+		queryer     QueryerMock
+		errResponse error
+		size        int
+	}{
+		"success_0_records": {
+			shopName: "testName",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return &dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{},
+					}, nil
+				},
+			},
+			errResponse: nil,
+			size:        0,
+		},
+		"success_1_record": {
+			shopName: "testName",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return &dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{
+							0: {
+								"id": {
+									S: aws.String("0"),
+								},
+								"friendly_name": {
+									S: aws.String("friendlyName"),
+								},
+								"shop_name": {
+									S: aws.String("testName"),
+								},
+							},
+						},
+					}, nil
+				},
+			},
+			errResponse: nil,
+			size:        1,
+		},
+		"success_2_records": {
+			shopName: "testName",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return &dynamodb.QueryOutput{
+						Items: []map[string]*dynamodb.AttributeValue{
+							0: {
+								"id": {
+									S: aws.String("0"),
+								},
+								"friendly_name": {
+									S: aws.String("friendlyName"),
+								},
+								"shop_name": {
+									S: aws.String("testName"),
+								},
+							},
+							1: {
+								"id": {
+									S: aws.String("0"),
+								},
+								"friendly_name": {
+									S: aws.String("friendlyName"),
+								},
+								"shop_name": {
+									S: aws.String("testName"),
+								},
+							},
+						},
+					}, nil
+				},
+			},
+			errResponse: nil,
+			size:        2,
+		},
+		"error": {
+			shopName: "",
+			queryer: QueryerMock{
+				QueryFunc: func(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+					return nil, errors.New("Some error")
+				},
+			},
+			errResponse: errors.New("Some error"),
+			size:        0,
+		},
+	}
+
+	for name, test := range tests {
+		t.Logf("Running test case: %s", name)
+		response, err := GetShopFriendlyNamesByShopName(test.shopName, "", test.queryer)
+		assert.Equal(t, len(response), test.size)
+		if len(response) > 0 {
+			assert.Equal(t, response[0].ShopName, test.shopName)
 		}
+		assert.Equal(t, err, test.errResponse)
+	}
+}
 
-		err := h.Put(test.shopname, test.tableName)
-		assert.Equal(t, err, test.err)
-		mockDynamoInterface.AssertExpectations(t)
+func TestHandlerDynamoHelper_PutItem(t *testing.T) {
+
+	tests := map[string]struct {
+		shopname    ShopName
+		tableName   string
+		putitemer   PutItemerMock
+		response    *dynamodb.PutItemOutput
+		errResponse error
+	}{
+		"success": {
+			tableName: "testTable",
+			shopname:  ShopName{Id: "1234", ShopName: "Test"},
+			putitemer: PutItemerMock{
+				PutItemFunc: func(input *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
+					return &dynamodb.PutItemOutput{
+						Attributes: map[string]*dynamodb.AttributeValue{
+							"Id": {
+								S: aws.String("1234"),
+							},
+							"ShopName": {
+								S: aws.String("Test"),
+							},
+						},
+					}, nil
+				},
+			},
+			response: &dynamodb.PutItemOutput{
+				Attributes: map[string]*dynamodb.AttributeValue{
+					"Id": {
+						S: aws.String("1234"),
+					},
+					"ShopName": {
+						S: aws.String("Test"),
+					},
+				},
+			},
+			errResponse: nil,
+		},
+		"error": {
+			tableName: "testTable",
+			shopname:  ShopName{},
+			putitemer: PutItemerMock{
+				PutItemFunc: func(input *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
+					return nil, errors.New("Could not insert shop")
+				},
+			},
+			response:    &dynamodb.PutItemOutput{},
+			errResponse: errors.New("Could not insert shop"),
+		},
+	}
+
+	for name, test := range tests {
+		t.Logf("Running test case: %s", name)
+		output, err := Put(test.shopname, test.tableName, test.putitemer)
+		if err != nil {
+			assert.Equal(t, err, test.errResponse)
+		} else {
+			assert.Equal(t, output, test.response)
+		}
 	}
 }

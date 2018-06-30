@@ -10,8 +10,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
-func (h *DynamoHandler) GetShopFriendlyNamesByShopName(shopName string, tableName string) ([]ShopName, error) {
-	queryInput := &dynamodb.QueryInput{
+func createShopFriendlyNamesByShopNameQuery(shopName string, tableName string) *dynamodb.QueryInput {
+	return &dynamodb.QueryInput{
 		TableName: aws.String(tableName),
 		IndexName: aws.String("shop_name-index"),
 		KeyConditions: map[string]*dynamodb.Condition{
@@ -31,8 +31,12 @@ func (h *DynamoHandler) GetShopFriendlyNamesByShopName(shopName string, tableNam
 		},
 		FilterExpression: aws.String("deleted = :deleted_v"),
 	}
+}
 
-	result, err := h.Svc.Query(queryInput)
+func GetShopFriendlyNamesByShopName(shopName string, tableName string, queryer DynamoQueryer) ([]ShopName, error) {
+	queryInput := createShopFriendlyNamesByShopNameQuery(shopName, tableName)
+
+	result, err := queryer.Query(queryInput)
 	if err != nil {
 		return []ShopName{}, err
 	}
@@ -46,29 +50,31 @@ func (h *DynamoHandler) GetShopFriendlyNamesByShopName(shopName string, tableNam
 	return shopList, err
 }
 
-func (h *DynamoHandler) Put(item interface{}, tableName string) error {
-
+func createPutItemInput(item interface{}, tableName string) (*dynamodb.PutItemInput, error) {
 	av, err := dynamodbattribute.MarshalMap(item)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	input := &dynamodb.PutItemInput{
-		Item:      av,
-		TableName: aws.String(tableName),
-	}
-
-	_, err = h.Svc.PutItem(input)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return &dynamodb.PutItemInput{
+		Item:         av,
+		TableName:    aws.String(tableName),
+		ReturnValues: aws.String("ALL_NEW"),
+	}, nil
 }
 
-func (h *DynamoHandler) GetById(idName string, idValue, tableName string, v interface{}) error {
-	result, err := h.Svc.Query(&dynamodb.QueryInput{
+func Put(item interface{}, tableName string, puter DynamoPutItemer) (*dynamodb.PutItemOutput, error) {
+
+	input, err := createPutItemInput(item, tableName)
+	if err != nil {
+		return nil, err
+	}
+
+	return puter.PutItem(input)
+}
+
+func createGetByIDQuery(idName, idValue, tableName string) *dynamodb.QueryInput {
+	return &dynamodb.QueryInput{
 		TableName: aws.String(tableName),
 		KeyConditions: map[string]*dynamodb.Condition{
 			idName: {
@@ -80,7 +86,12 @@ func (h *DynamoHandler) GetById(idName string, idValue, tableName string, v inte
 				},
 			},
 		},
-	})
+	}
+}
+
+func GetById(idName, idValue, tableName string, v interface{}, queryer DynamoQueryer) error {
+	query := createGetByIDQuery(idName, idValue, tableName)
+	result, err := queryer.Query(query)
 	if err != nil {
 		return err
 	}
@@ -93,7 +104,7 @@ func (h *DynamoHandler) GetById(idName string, idValue, tableName string, v inte
 
 }
 
-func (h *DynamoHandler) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+func (d *Dynamo) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
 	})
@@ -104,7 +115,7 @@ func (h *DynamoHandler) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryO
 	return svc.Query(queryInput)
 }
 
-func (h *DynamoHandler) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
+func (d *Dynamo) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
 	})
@@ -113,4 +124,7 @@ func (h *DynamoHandler) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutIt
 	}
 	svc := dynamodb.New(sess)
 	return svc.PutItem(putItem)
+}
+
+type Dynamo struct {
 }
