@@ -8,3 +8,4 @@ RUN go get github.com/aws/aws-sdk-go/aws
 RUN go get github.com/aws/aws-sdk-go/aws/session
 RUN go get github.com/aws/aws-sdk-go/service/dynamodb
 RUN go get github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute
+RUN go get github.com/satori/go.uuid
