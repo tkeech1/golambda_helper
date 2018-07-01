@@ -93,6 +93,7 @@ func TestHandlerResponseHelper_GenerateResponseShop(t *testing.T) {
 		assert.Equal(t, test.shopname.ID, body.ShopName.ID)
 		assert.Equal(t, test.shopname.FriendlyName, body.ShopName.FriendlyName)
 		assert.Equal(t, test.shopname.ShopName, body.ShopName.ShopName)
+		assert.Equal(t, test.err, err)
 	}
 
 }
@@ -129,6 +130,7 @@ func TestHandlerResponseHelper_GenerateResponseShops(t *testing.T) {
 			assert.Equal(t, test.shopname[0].ID, body.ShopName[0].ID)
 			assert.Equal(t, test.shopname[0].FriendlyName, body.ShopName[0].FriendlyName)
 			assert.Equal(t, test.shopname[0].ShopName, body.ShopName[0].ShopName)
+			assert.Equal(t, test.err, err)
 		}
 	}
 
