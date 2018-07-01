@@ -1,4 +1,4 @@
-package golambda_helper
+package golambdahelper
 
 import (
 	"errors"
@@ -33,6 +33,7 @@ func createShopFriendlyNamesByShopNameQuery(shopName string, tableName string) *
 	}
 }
 
+// GetShopFriendlyNamesByShopName gets shops by friendly name
 func GetShopFriendlyNamesByShopName(shopName string, tableName string, queryer DynamoQueryer) ([]ShopName, error) {
 	queryInput := createShopFriendlyNamesByShopNameQuery(shopName, tableName)
 
@@ -63,6 +64,7 @@ func createPutItemInput(item interface{}, tableName string) (*dynamodb.PutItemIn
 	}, nil
 }
 
+// Put puts items to a Dynamo DB
 func Put(item interface{}, tableName string, puter DynamoPutItemer) (*dynamodb.PutItemOutput, error) {
 
 	input, err := createPutItemInput(item, tableName)
@@ -89,7 +91,8 @@ func createGetByIDQuery(idName, idValue, tableName string) *dynamodb.QueryInput 
 	}
 }
 
-func GetById(idName, idValue, tableName string, v interface{}, queryer DynamoQueryer) error {
+// GetByID gets items from a DynamoDB by ID
+func GetByID(idName, idValue, tableName string, v interface{}, queryer DynamoQueryer) error {
 	query := createGetByIDQuery(idName, idValue, tableName)
 	result, err := queryer.Query(query)
 	if err != nil {
@@ -100,10 +103,11 @@ func GetById(idName, idValue, tableName string, v interface{}, queryer DynamoQue
 		return dynamodbattribute.UnmarshalMap(result.Items[0], &v)
 	}
 
-	return errors.New("An error occurred during processing.")
+	return errors.New("an error occurred during processing")
 
 }
 
+// Query queries against a DynamoDB
 func (d *Dynamo) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
@@ -115,6 +119,7 @@ func (d *Dynamo) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, 
 	return svc.Query(queryInput)
 }
 
+// PutItem puts an item into a DynamoDB
 func (d *Dynamo) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
@@ -126,5 +131,6 @@ func (d *Dynamo) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutItemOutpu
 	return svc.PutItem(putItem)
 }
 
+// Dynamo is used a receiever for DynamoDB methods
 type Dynamo struct {
 }

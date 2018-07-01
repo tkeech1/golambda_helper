@@ -1,4 +1,4 @@
-package golambda_helper_test
+package golambdahelper_test
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tkeech1/golambda_helper"
+	"github.com/tkeech1/golambdahelper"
 )
 
 func TestHandlerResponseHelper_GenerateError(t *testing.T) {
@@ -32,7 +32,7 @@ func TestHandlerResponseHelper_GenerateError(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		response, err := golambda_helper.GenerateError(test.request)
+		response, err := golambdahelper.GenerateError(test.request)
 		assert.IsType(t, test.err, err)
 		assert.Equal(t, test.expect, response.StatusCode)
 		assert.Equal(t, test.errorReponseText, response.Body)
@@ -57,7 +57,7 @@ func TestHandlerResponseHelper_GenerateRedirect(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		response, err := golambda_helper.GenerateRedirect(test.request)
+		response, err := golambdahelper.GenerateRedirect(test.request)
 		assert.IsType(t, test.err, err)
 		assert.Equal(t, test.expect, response.StatusCode)
 		assert.Equal(t, test.responseText, response.Header.Location)
@@ -68,29 +68,29 @@ func TestHandlerResponseHelper_GenerateRedirect(t *testing.T) {
 func TestHandlerResponseHelper_GenerateResponseShop(t *testing.T) {
 
 	tests := []struct {
-		shopname golambda_helper.ShopName
-		response golambda_helper.Response
+		shopname golambdahelper.ShopName
+		response golambdahelper.Response
 		err      error
 	}{
 		{
-			shopname: golambda_helper.ShopName{Id: "someId", FriendlyName: "Test Friendly Name", ShopName: "Shop Name"},
-			response: golambda_helper.Response{},
+			shopname: golambdahelper.ShopName{ID: "someId", FriendlyName: "Test Friendly Name", ShopName: "Shop Name"},
+			response: golambdahelper.Response{},
 			err:      nil,
 		},
 		{
-			shopname: golambda_helper.ShopName{},
-			response: golambda_helper.Response{},
+			shopname: golambdahelper.ShopName{},
+			response: golambdahelper.Response{},
 			err:      nil,
 		},
 	}
 
 	for _, test := range tests {
-		response, err := golambda_helper.GenerateResponseShop(test.shopname)
+		response, err := golambdahelper.GenerateResponseShop(test.shopname)
 		assert.IsType(t, test.err, err)
 		assert.IsType(t, test.response, response)
-		body := &golambda_helper.ReturnObjectShopName{}
+		body := &golambdahelper.ReturnObjectShopName{}
 		err = json.Unmarshal([]byte(response.Body), body)
-		assert.Equal(t, test.shopname.Id, body.ShopName.Id)
+		assert.Equal(t, test.shopname.ID, body.ShopName.ID)
 		assert.Equal(t, test.shopname.FriendlyName, body.ShopName.FriendlyName)
 		assert.Equal(t, test.shopname.ShopName, body.ShopName.ShopName)
 	}
@@ -100,33 +100,33 @@ func TestHandlerResponseHelper_GenerateResponseShop(t *testing.T) {
 func TestHandlerResponseHelper_GenerateResponseShops(t *testing.T) {
 
 	tests := []struct {
-		shopname []golambda_helper.ShopName
-		response golambda_helper.Response
+		shopname []golambdahelper.ShopName
+		response golambdahelper.Response
 		err      error
 	}{
 		{
-			shopname: []golambda_helper.ShopName{
-				{Id: "someId", FriendlyName: "Test Friendly Name", ShopName: "Shop Name"},
-				{Id: "someId2", FriendlyName: "Test Friendly Name2", ShopName: "Shop Name2"},
+			shopname: []golambdahelper.ShopName{
+				{ID: "someId", FriendlyName: "Test Friendly Name", ShopName: "Shop Name"},
+				{ID: "someId2", FriendlyName: "Test Friendly Name2", ShopName: "Shop Name2"},
 			},
-			response: golambda_helper.Response{},
+			response: golambdahelper.Response{},
 			err:      nil,
 		},
 		{
-			shopname: []golambda_helper.ShopName{},
-			response: golambda_helper.Response{},
+			shopname: []golambdahelper.ShopName{},
+			response: golambdahelper.Response{},
 			err:      nil,
 		},
 	}
 
 	for _, test := range tests {
-		response, err := golambda_helper.GenerateResponseShops(test.shopname)
+		response, err := golambdahelper.GenerateResponseShops(test.shopname)
 		assert.IsType(t, test.err, err)
 		assert.IsType(t, test.response, response)
-		body := &golambda_helper.ReturnObjectShopNames{}
+		body := &golambdahelper.ReturnObjectShopNames{}
 		err = json.Unmarshal([]byte(response.Body), body)
 		if len(body.ShopName) > 0 {
-			assert.Equal(t, test.shopname[0].Id, body.ShopName[0].Id)
+			assert.Equal(t, test.shopname[0].ID, body.ShopName[0].ID)
 			assert.Equal(t, test.shopname[0].FriendlyName, body.ShopName[0].FriendlyName)
 			assert.Equal(t, test.shopname[0].ShopName, body.ShopName[0].ShopName)
 		}

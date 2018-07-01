@@ -1,4 +1,4 @@
-package golambda_helper
+package golambdahelper
 
 import (
 	"errors"
@@ -46,7 +46,7 @@ func TestHandlerDynamoHelper_GetById(t *testing.T) {
 					}, nil
 				},
 			},
-			errResponse: errors.New("An error occurred during processing."),
+			errResponse: errors.New("an error occurred during processing"),
 		},
 		"success_1_record": {
 			tableName: "testTable",
@@ -89,7 +89,7 @@ func TestHandlerDynamoHelper_GetById(t *testing.T) {
 					}, nil
 				},
 			},
-			errResponse: errors.New("An error occurred during processing."),
+			errResponse: errors.New("an error occurred during processing"),
 		},
 		"error": {
 			tableName: "testTable",
@@ -107,11 +107,11 @@ func TestHandlerDynamoHelper_GetById(t *testing.T) {
 	for name, test := range tests {
 		t.Logf("Running test case: %s", name)
 		var response ShopName
-		err := GetById(test.idName, test.idValue, test.tableName, &response, test.queryer)
+		err := GetByID(test.idName, test.idValue, test.tableName, &response, test.queryer)
 		if err != nil {
 			assert.Equal(t, err, test.errResponse)
 		} else {
-			assert.Equal(t, response.Id, test.idValue)
+			assert.Equal(t, response.ID, test.idValue)
 		}
 
 	}
@@ -160,7 +160,7 @@ func TestHandlerDynamoHelper_createPutItemOutput(t *testing.T) {
 	}{
 		"1": {
 			tableName: "testTable",
-			shopname:  ShopName{Id: "1234", ShopName: "Test"},
+			shopname:  ShopName{ID: "1234", ShopName: "Test"},
 		},
 	}
 
@@ -333,7 +333,7 @@ func TestHandlerDynamoHelper_PutItem(t *testing.T) {
 	}{
 		"success": {
 			tableName: "testTable",
-			shopname:  ShopName{Id: "1234", ShopName: "Test"},
+			shopname:  ShopName{ID: "1234", ShopName: "Test"},
 			putitemer: PutItemerMock{
 				PutItemFunc: func(input *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
 					return &dynamodb.PutItemOutput{

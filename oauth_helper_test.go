@@ -1,10 +1,10 @@
-package golambda_helper_test
+package golambdahelper_test
 
 import (
 	"errors"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/tkeech1/golambda_helper"
+	"github.com/tkeech1/golambdahelper"
 	"testing"
 )
 
@@ -49,7 +49,7 @@ func TestHandlerShopify_GenerateState(t *testing.T) {
 
 	for name, test := range tests {
 		t.Logf("Running test case: %s", name)
-		response, err := golambda_helper.GenerateState(test.NewV4Mock)
+		response, err := golambdahelper.GenerateState(test.NewV4Mock)
 		assert.Equal(t, test.Response, response)
 		assert.Equal(t, test.UuidErr, err)
 	}

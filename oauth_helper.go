@@ -1,5 +1,6 @@
-package golambda_helper
+package golambdahelper
 
+// GenerateState generates a new Shopify state value for Oauth
 func GenerateState(uuid NewV4er) (string, error) {
 	uid, err := uuid.NewV4()
 	if err != nil {
