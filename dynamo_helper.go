@@ -60,7 +60,7 @@ func createPutItemInput(item interface{}, tableName string) (*dynamodb.PutItemIn
 	return &dynamodb.PutItemInput{
 		Item:         av,
 		TableName:    aws.String(tableName),
-		ReturnValues: aws.String("ALL_NEW"),
+		ReturnValues: aws.String("ALL_OLD"),
 	}, nil
 }
 
@@ -108,7 +108,7 @@ func GetByID(idName, idValue, tableName string, v interface{}, queryer DynamoQue
 }
 
 // Query queries against a DynamoDB
-func (d *Dynamo) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
+func (d Dynamo) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
 	})
@@ -120,7 +120,7 @@ func (d *Dynamo) Query(queryInput *dynamodb.QueryInput) (*dynamodb.QueryOutput, 
 }
 
 // PutItem puts an item into a DynamoDB
-func (d *Dynamo) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
+func (d Dynamo) PutItem(putItem *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("ENV_AWS_REGION")),
 	})

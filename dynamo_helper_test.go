@@ -175,7 +175,7 @@ func TestHandlerDynamoHelper_createPutItemOutput(t *testing.T) {
 			t.Errorf("Failed to marshal item")
 		}
 		assert.Equal(t, response.TableName, aws.String(test.tableName))
-		assert.Equal(t, response.ReturnValues, aws.String("ALL_NEW"))
+		assert.Equal(t, response.ReturnValues, aws.String("ALL_OLD"))
 		assert.Equal(t, response.Item, av)
 	}
 }
