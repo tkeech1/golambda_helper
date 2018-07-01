@@ -25,7 +25,7 @@ func createShopFriendlyNamesByShopNameQuery(shopName string, tableName string) *
 			},
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":deleted_v": { // Required
+			":deleted_v": {
 				S: aws.String("false"),
 			},
 		},
