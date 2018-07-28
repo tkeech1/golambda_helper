@@ -16,7 +16,7 @@ jobs:
   build-go1.11:
     docker:
       - image: circleci/golang:1.11-rc
-    working_directory: ~/
+    working_directory: ~/github.com/tkeech1/golambdahelper
     steps:
       - checkout
       # specify any bash command here prefixed with `run: `
