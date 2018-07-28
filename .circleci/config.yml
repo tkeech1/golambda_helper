@@ -8,7 +8,7 @@ jobs:
       # specify the version
       - image: circleci/golang:1.9
       - image: circleci/golang:1.10
-      - image: ciriclci/golang:1.11-rc
+      #- image: ciriclci/golang:1.11-rc
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
