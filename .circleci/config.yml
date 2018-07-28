@@ -15,7 +15,7 @@ jobs:
       - run: bash <(curl -s https://codecov.io/bash)
   build-go1.11:
     docker:
-      - image: circleci/golang:1.8
+      - image: circleci/golang:1.11-rc
     working_directory: /go/src/github.com/tkeech1/golambdahelper
     steps:
       - checkout
